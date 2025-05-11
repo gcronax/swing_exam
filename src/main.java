@@ -1,8 +1,10 @@
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 
@@ -12,6 +14,12 @@ public class main {
     public static JPanel panelMENU ;
     public static JPanel panelCentral ;
     public static JPanel panelBotonesMenu;
+    static JDialog dialogHabitos;
+
+    public static JPanel panelTitulo;
+    public static JPanel panelJTable;
+    public static JPanel panelBotones;
+    public static JTable tabla;
 
     static JButton btnhabitos;
     static JButton btnregistro;
@@ -74,27 +82,92 @@ public class main {
     }
 
     private static void ventanaHabitos() {
-        JDialog dialogHabitos = new JDialog(frameMENU, "Habitos", true);
+        dialogHabitos = new JDialog(frameMENU, "Habitos", true);
         dialogHabitos.setSize(frameMENU.getWidth(), frameMENU.getHeight());
         dialogHabitos.setLocationRelativeTo(frameMENU);
-
+        dialogHabitos.setLayout(new BorderLayout());
 
 
 
 
         crearPanelTitulo();
         crearPanelTabla();
-        crearPanelBotones();
+////        crearPanelBotones();
 
         dialogHabitos.add(panelTitulo, BorderLayout.NORTH);
         dialogHabitos.add(panelJTable, BorderLayout.CENTER);
-        dialogHabitos.add(panelBotonesMenu, BorderLayout.SOUTH);
+////        dialogHabitos.add(panelBotones, BorderLayout.SOUTH);
 
 
 
 
         dialogHabitos.setVisible(true);
     }
+
+    private static void crearPanelBotones() {
+
+    }
+
+    private static void crearPanelTabla() {
+        panelJTable = new JPanel(new BorderLayout());
+        panelJTable.setBorder(BorderFactory
+                .createEmptyBorder(0, 20, 0, 20));
+
+        DefaultTableModel dtm = new DefaultTableModel() {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        dtm.addColumn("col1");
+        dtm.addColumn("col2");
+        dtm.addColumn("col3");
+        dtm.addColumn("col4");
+
+        tabla = new JTable(dtm);
+        tabla.setRowHeight(25);
+        tabla.getTableHeader().setReorderingAllowed(false);
+
+        JScrollPane scrollTabla = new JScrollPane(tabla);
+        scrollTabla.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+        panelJTable.add(scrollTabla, BorderLayout.CENTER);
+
+        cargarDatosTabla(dtm);
+    }
+
+    private static void cargarDatosTabla(DefaultTableModel dtm) {
+        try {
+            ArrayList<Object[]> datosBaseDatos = GestionBaseDatos.mostrarDatosTabla();
+
+            if (datosBaseDatos != null  && !datosBaseDatos.isEmpty()) {
+                for (Object[] fila : datosBaseDatos) {
+                    dtm.addRow(fila);
+                }
+            } else {
+                JOptionPane.showMessageDialog(dialogHabitos, "No se encuentran datos en la tabla",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(dialogHabitos, "Error en la base de datos "+e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private static void crearPanelTitulo() {
+        panelTitulo = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        panelTitulo.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JLabel titulo = new JLabel("Titulo ventana");
+        titulo.setFont(new Font("Montserrat", Font.BOLD, 25));
+        panelTitulo.setBackground(Color.gray);
+        titulo.setForeground(Color.white);
+        panelTitulo.add(titulo);
+    }
+
     private static void ventanaRegistro() {
         JDialog dialogRegistro = new JDialog(frameMENU, "Registro", true);
         dialogRegistro.setSize(frameMENU.getWidth(), frameMENU.getHeight());
