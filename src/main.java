@@ -1,6 +1,8 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -92,20 +94,16 @@ public class main {
 
         crearPanelTitulo();
         crearPanelTabla();
-////        crearPanelBotones();
+        crearPanelBotones();
 
         dialogHabitos.add(panelTitulo, BorderLayout.NORTH);
         dialogHabitos.add(panelJTable, BorderLayout.CENTER);
-////        dialogHabitos.add(panelBotones, BorderLayout.SOUTH);
+        dialogHabitos.add(panelBotones, BorderLayout.SOUTH);
 
 
 
 
         dialogHabitos.setVisible(true);
-    }
-
-    private static void crearPanelBotones() {
-
     }
 
     private static void crearPanelTabla() {
@@ -167,6 +165,254 @@ public class main {
         titulo.setForeground(Color.white);
         panelTitulo.add(titulo);
     }
+
+    private static void crearPanelBotones() {
+        panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
+        panelBotones.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JButton boton1 = new JButton("anadir");
+        boton1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JDialog dialogoAnadir = new JDialog(dialogHabitos, "Anadir", true);
+                dialogoAnadir.setSize(500, 400);
+                dialogoAnadir.setLocationRelativeTo(dialogHabitos);
+                dialogoAnadir.setResizable(false);
+                dialogoAnadir.setModal(true);
+                dialogoAnadir.setLayout(new BorderLayout());
+
+                JPanel panelSuperiorDialog = new JPanel();
+                panelSuperiorDialog.setLayout(new GridLayout(2, 2, 10, 10));
+                panelSuperiorDialog.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+                JLabel textoAnadir = new JLabel("Nombre:");
+                JTextField campoAnadir = new JTextField(20);
+
+                JLabel textoFrecuencia = new JLabel("Frecuencia");
+                JComboBox<String> listaOpciones = new JComboBox<>(new String[]{"diaria", "semanal"}); //opcion 1 y opcion2 de la lista
+
+                panelSuperiorDialog.add(textoAnadir);
+                panelSuperiorDialog.add(campoAnadir);
+                panelSuperiorDialog.add(textoFrecuencia);
+                panelSuperiorDialog.add(listaOpciones);
+
+                JPanel panelCentralDialog = new JPanel(new BorderLayout(10, 0));
+                panelCentralDialog.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+
+                JTextArea areaTexto = new JTextArea();
+                areaTexto.setLineWrap(true);
+                areaTexto.setWrapStyleWord(true);
+
+                JScrollPane scrollPane = new JScrollPane(areaTexto);
+                scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+                JPanel panelEtiqueta = new JPanel(new BorderLayout());
+                JLabel etiquetaAreaTexto = new JLabel("Descripcion:");
+                panelEtiqueta.add(etiquetaAreaTexto, BorderLayout.NORTH);
+
+                panelCentralDialog.add(panelEtiqueta, BorderLayout.WEST);
+                panelCentralDialog.add(scrollPane, BorderLayout.CENTER);
+
+                JPanel panelInferiorDialog = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
+                panelInferiorDialog.setBorder(BorderFactory.createEmptyBorder(10, 0, 20, 0));
+
+                JButton botonAceptar = new JButton("Aceptar");
+                botonAceptar.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        String nombre = campoAnadir.getText();
+                        String frecuencia = (String) listaOpciones.getSelectedItem();
+                        String descripcion = areaTexto.getText();
+
+                        if (campoAnadir.getText().trim().isEmpty() || areaTexto.getText().trim().isEmpty()) {
+                            JOptionPane.showMessageDialog(dialogoAnadir, "Aviso, no has introducido ningun dato.",
+                                    "Aviso",
+                                    JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            GestionBaseDatos.insertarDatos(nombre, frecuencia, descripcion);
+                            campoAnadir.setText("");
+                            areaTexto.setText("");
+
+                            dialogoAnadir.dispose();
+                        }
+                    }
+                });
+
+                JButton botonCancelar = new JButton("Cancelar");
+                botonCancelar.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        dialogoAnadir.dispose();
+                    }
+                });
+                panelInferiorDialog.add(botonAceptar);
+                panelInferiorDialog.add(botonCancelar);
+
+                dialogoAnadir.add(panelSuperiorDialog, BorderLayout.NORTH);
+                dialogoAnadir.add(panelCentralDialog, BorderLayout.CENTER);
+                dialogoAnadir.add(panelInferiorDialog, BorderLayout.SOUTH);
+
+                dialogoAnadir.setVisible(true);
+            }
+        });
+
+        JButton boton2 = new JButton("modificar");
+        boton2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int filaSeleccinada = tabla.getSelectedRow();
+
+                if (filaSeleccinada < 0) {
+                    JOptionPane.showMessageDialog(dialogHabitos, "Porfavor selecciona un dato",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                } else {
+                    int id = (int) tabla.getValueAt(filaSeleccinada, 0);
+                    String nombre = (String) tabla.getValueAt(filaSeleccinada, 1);
+                    String descripcion = (String) tabla.getValueAt(filaSeleccinada, 2);
+                    String frecuencia = (String) tabla.getValueAt(filaSeleccinada, 3);
+
+                    JDialog dialogoModificar = new JDialog(dialogHabitos, "Modificar", true);
+                    dialogoModificar.setSize(500, 400);
+                    dialogoModificar.setLocationRelativeTo(dialogHabitos);
+                    dialogoModificar.setResizable(false);
+                    dialogoModificar.setModal(true);
+                    dialogoModificar.setLayout(new BorderLayout());
+
+                    JPanel panelSuperiorDialog = new JPanel();
+                    panelSuperiorDialog.setLayout(new GridLayout(2, 2, 10, 10));
+                    panelSuperiorDialog.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
+
+                    JLabel textoNombre = new JLabel("Nombre:");
+                    JTextField campoNombre = new JTextField(nombre);
+
+                    JLabel textoFrecuencia = new JLabel("Frecuencia:");
+                    String[] opciones = {"diaria", "semanal"};
+                    JComboBox<String> listaOpciones = new JComboBox<>(opciones);
+
+                    if (frecuencia.equals("diaria")) {
+                        listaOpciones.setSelectedIndex(0);
+                    } else if (frecuencia.equals("semanal")) {
+                        listaOpciones.setSelectedIndex(1);
+                    } else {
+                        listaOpciones.setSelectedIndex(0);
+                    }
+
+                    panelSuperiorDialog.add(textoNombre, BorderLayout.WEST);
+                    panelSuperiorDialog.add(campoNombre, BorderLayout.CENTER);
+                    panelSuperiorDialog.add(textoFrecuencia);
+                    panelSuperiorDialog.add(listaOpciones);
+
+                    JPanel panelCentralDialog = new JPanel(new BorderLayout(10, 0));
+                    panelCentralDialog.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+
+                    JLabel textoDescripcion = new JLabel("Descripcion");
+                    JTextArea campoDescripcion = new JTextArea(descripcion);
+                    campoDescripcion.setLineWrap(true);
+                    campoDescripcion.setWrapStyleWord(true);
+
+                    JScrollPane scrollPane = new JScrollPane(campoDescripcion);
+                    scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+                    panelCentralDialog.add(textoDescripcion, BorderLayout.WEST);
+                    panelCentralDialog.add(scrollPane, BorderLayout.CENTER);
+
+                    JPanel panelInferiorDialog = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
+                    panelInferiorDialog.setBorder(BorderFactory.createEmptyBorder(10, 0, 20, 0));
+
+                    JButton botonAceptar = new JButton("Aceptar");
+                    botonAceptar.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (campoNombre.getText().trim().isEmpty() || campoDescripcion.getText().trim().isEmpty()) {
+                                JOptionPane.showMessageDialog(dialogoModificar, "No puedes dejar campos vacios!",
+                                        "Error de modificacion",
+                                        JOptionPane.ERROR_MESSAGE);
+                                return;
+                            }
+                            String nuevoNombre = campoNombre.getText().trim();
+                            String nuevaDescripcion = campoDescripcion.getText().trim();
+                            String nuevaFrecuencia = (String) listaOpciones.getSelectedItem();
+
+                            boolean exitoActualizar = GestionBaseDatos.modificarDatos(nuevoNombre, nuevaDescripcion, nuevaFrecuencia, id);
+
+                            if (exitoActualizar) {
+                                JOptionPane.showMessageDialog(dialogoModificar, "Datos modificados correctamente",
+                                        "Exito",
+                                        JOptionPane.INFORMATION_MESSAGE);
+
+                                dialogoModificar.dispose();
+
+                            } else {
+                                JOptionPane.showMessageDialog(dialogoModificar, "Error al actualizar",
+                                        "Error",
+                                        JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                    });
+                    panelInferiorDialog.add(botonAceptar);
+
+
+                    JButton botonCancelar = new JButton("Cancelar");
+                    botonCancelar.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            dialogoModificar.dispose();
+                        }
+                    });
+                    panelInferiorDialog.add(botonCancelar);
+
+
+                    dialogoModificar.add(panelSuperiorDialog, BorderLayout.NORTH);
+                    dialogoModificar.add(panelCentralDialog, BorderLayout.CENTER);
+                    dialogoModificar.add(panelInferiorDialog, BorderLayout.SOUTH);
+                    dialogoModificar.setVisible(true);
+                }
+            }
+        });
+
+        JButton boton3 = new JButton("eliminar");
+        boton3.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int filaSeleccinada = tabla.getSelectedRow();
+
+                if (filaSeleccinada < 0) {
+                    JOptionPane.showMessageDialog(dialogHabitos, "Porfavor selecciona un dato",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                } else {
+                    int id = (int) tabla.getValueAt(filaSeleccinada, 0);
+
+                    int confirmarDelete = JOptionPane.showConfirmDialog(dialogHabitos,
+                            "Seguro que quieres eliminar el registro?",
+                            "Confirmacion",
+                            JOptionPane.YES_NO_OPTION);
+
+                    if (confirmarDelete == JOptionPane.YES_OPTION) {
+                        boolean exitoEliminar = GestionBaseDatos.eliminarDatos(id);
+
+                        if (exitoEliminar) {
+                            JOptionPane.showMessageDialog(dialogHabitos,
+                                    "Datos eliminados",
+                                    "Exito",
+                                    JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(dialogHabitos,
+                                    "Error al eliminar el registro",
+                                    "Error",
+                                    JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                }
+            }
+        });
+        panelBotones.add(boton1);
+        panelBotones.add(boton2);
+        panelBotones.add(boton3);
+    }
+
+
 
     private static void ventanaRegistro() {
         JDialog dialogRegistro = new JDialog(frameMENU, "Registro", true);
