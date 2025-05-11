@@ -3,9 +3,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
@@ -18,10 +16,14 @@ public class main {
     public static JPanel panelBotonesMenu;
     static JDialog dialogHabitos;
 
-    public static JPanel panelTitulo;
+    public static JPanel paneltitulo;
     public static JPanel panelJTable;
     public static JPanel panelBotones;
     public static JTable tabla;
+
+    private static JPanel panelTituloRegistro;
+    private static JPanel panelAreaTexto;
+    private static JTextArea areaTexto;
 
     static JButton btnhabitos;
     static JButton btnregistro;
@@ -89,23 +91,24 @@ public class main {
         dialogHabitos.setLocationRelativeTo(frameMENU);
         dialogHabitos.setLayout(new BorderLayout());
 
-
-
-
         crearPanelTitulo();
         crearPanelTabla();
         crearPanelBotones();
 
-        dialogHabitos.add(panelTitulo, BorderLayout.NORTH);
+        dialogHabitos.add(paneltitulo, BorderLayout.NORTH);
         dialogHabitos.add(panelJTable, BorderLayout.CENTER);
         dialogHabitos.add(panelBotones, BorderLayout.SOUTH);
 
-
-
-
         dialogHabitos.setVisible(true);
     }
+    private static void ActualizarPanelTabla(){
+        dialogHabitos.remove(panelJTable);
+        crearPanelTabla();
+        dialogHabitos.add(panelJTable, BorderLayout.CENTER);
+        dialogHabitos.revalidate();
+        dialogHabitos.repaint();
 
+    }
     private static void crearPanelTabla() {
         panelJTable = new JPanel(new BorderLayout());
         panelJTable.setBorder(BorderFactory
@@ -156,14 +159,14 @@ public class main {
     }
 
     private static void crearPanelTitulo() {
-        panelTitulo = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        panelTitulo.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        paneltitulo = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        paneltitulo.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         JLabel titulo = new JLabel("Titulo ventana");
         titulo.setFont(new Font("Montserrat", Font.BOLD, 25));
-        panelTitulo.setBackground(Color.gray);
+        paneltitulo.setBackground(Color.gray);
         titulo.setForeground(Color.white);
-        panelTitulo.add(titulo);
+        paneltitulo.add(titulo);
     }
 
     private static void crearPanelBotones() {
@@ -234,6 +237,8 @@ public class main {
                             areaTexto.setText("");
 
                             dialogoAnadir.dispose();
+                            ActualizarPanelTabla();
+
                         }
                     }
                 });
@@ -342,6 +347,7 @@ public class main {
                                         JOptionPane.INFORMATION_MESSAGE);
 
                                 dialogoModificar.dispose();
+                                ActualizarPanelTabla();
 
                             } else {
                                 JOptionPane.showMessageDialog(dialogoModificar, "Error al actualizar",
@@ -358,6 +364,7 @@ public class main {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             dialogoModificar.dispose();
+
                         }
                     });
                     panelInferiorDialog.add(botonCancelar);
@@ -397,6 +404,8 @@ public class main {
                                     "Datos eliminados",
                                     "Exito",
                                     JOptionPane.INFORMATION_MESSAGE);
+                            ActualizarPanelTabla();
+
                         } else {
                             JOptionPane.showMessageDialog(dialogHabitos,
                                     "Error al eliminar el registro",
@@ -418,11 +427,92 @@ public class main {
         JDialog dialogRegistro = new JDialog(frameMENU, "Registro", true);
         dialogRegistro.setSize(frameMENU.getWidth(), frameMENU.getHeight());
         dialogRegistro.setLocationRelativeTo(frameMENU);
+        dialogRegistro.setLayout(new BorderLayout());
+
+        crearPanelTituloRegistro();
+        crearPanelAreaTexto();
+
+        dialogRegistro.add(panelTituloRegistro, BorderLayout.NORTH);
+        dialogRegistro.add(panelAreaTexto, BorderLayout.CENTER);
 
 
 
         dialogRegistro.setVisible(true);
     }
+    private static void crearPanelTituloRegistro() {
+        panelTituloRegistro = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        panelTituloRegistro.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JLabel titulo = new JLabel("Titulo ventana 2");
+        titulo.setFont(new Font("Montserrat", Font.BOLD, 30));
+
+        panelTituloRegistro.add(titulo);
+    }
+    private static void crearPanelAreaTexto() {
+        panelAreaTexto = new JPanel(new BorderLayout());
+        panelAreaTexto.setBorder(BorderFactory.createEmptyBorder(50, 100, 100, 100));
+
+        areaTexto = new JTextArea();
+        areaTexto.setFont(new Font("Montserrat", Font.PLAIN, 12));
+        areaTexto.setEditable(false);
+        areaTexto.setLineWrap(true);
+        areaTexto.setWrapStyleWord(true);
+
+
+
+        Statement stmt = null;
+        ResultSet rs = null;
+        Connection conn = null;
+
+        try {
+            conn = connect();
+
+            String sql = "SELECT h.nombre,\n" +
+                    "COUNT(r.id) AS total_registros,\n" +
+                    "SUM(r.cumplido) AS veces_cumplido\n" +
+                    "FROM habitos h LEFT JOIN registro r ON h.id = r.id_habito\n" +
+                    "GROUP BY h.id, h.nombre;";
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(sql);
+
+            while (rs.next()) {
+                String nombre = rs.getString("nombre");
+                int total = rs.getInt("total_registros");
+                int cumplido = rs.getInt("veces_cumplido");
+
+                int porcentaje = (total > 0) ? (cumplido * 100 / total) : 0;
+                areaTexto.append(nombre + "\n");
+                areaTexto.append("Se ha cumplido el " + porcentaje + "% de las veces (" + cumplido + "/" + total + ")\n\n");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Debug: Error al consultar datos "+e.getMessage());
+        } finally {
+            try {
+                if (stmt != null) stmt.close();
+                if (rs != null) rs.close();
+                main.disconnect(conn);
+            } catch (SQLException e) {
+                System.out.println("Debug: "+e.getMessage());
+            }
+        }
+
+
+
+        JScrollPane scrollPane = new JScrollPane(areaTexto);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+
+        panelAreaTexto.add(scrollPane, BorderLayout.CENTER);
+
+
+    }
+
+
+
+
+
+
 
     public static void crearJMenu(){
         JMenuBar menuBar = new JMenuBar(); // Crear barra de menú
