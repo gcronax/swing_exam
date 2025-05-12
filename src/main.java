@@ -90,11 +90,11 @@ public class main {
         btnregistro.setFont(new Font("Arial", Font.BOLD, 18));
 
         if (n==1){
-            btnregistro.setPreferredSize(new Dimension(120,50));
-            btnhabitos.setPreferredSize(new Dimension(120,50));
+            btnregistro.setPreferredSize(new Dimension(150,70));
+            btnhabitos.setPreferredSize(new Dimension(150,70));
         } else if (n==2) {
-            btnregistro.setPreferredSize(new Dimension(90,30));
-            btnhabitos.setPreferredSize(new Dimension(90,30));
+            btnregistro.setPreferredSize(new Dimension(110,20));
+            btnhabitos.setPreferredSize(new Dimension(110,20));
         }
 
         if (panelCentral.getBackground()!=COLOR_FONDO_LIGHT){
