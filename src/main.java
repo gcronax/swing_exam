@@ -97,6 +97,17 @@ public class main {
             btnhabitos.setPreferredSize(new Dimension(90,30));
         }
 
+        if (panelCentral.getBackground()!=COLOR_FONDO_LIGHT){
+            panelBotonesMenu.setBackground(COLOR_FONDO_DARK);
+            btnregistro.setBackground(COLOR_BOTON_DARK);
+            btnhabitos.setBackground(COLOR_BOTON_DARK);
+        }else {
+            panelBotonesMenu.setBackground(COLOR_FONDO_LIGHT);
+            btnregistro.setBackground(COLOR_BOTON_LIGHT);
+            btnhabitos.setBackground(COLOR_BOTON_LIGHT);
+
+        }
+
         panelBotonesMenu.add(btnhabitos);
         panelBotonesMenu.add(btnregistro);
 
