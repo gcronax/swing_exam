@@ -542,9 +542,6 @@ public class main {
 
 
 
-
-
-
     public static void crearJMenu(){
         JMenuBar menuBar = new JMenuBar(); // Crear barra de menú
         JMenu menuAspecto = new JMenu("Configuracion"); // Crear el menú
