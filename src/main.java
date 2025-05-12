@@ -58,31 +58,51 @@ public class main {
         JLabel imagenLabel = new JLabel(imagenIconoEscalado);
         panelCentral.add(imagenLabel);
 
-        panelBotonesMenu = new JPanel();
+        crearPanelBotonesMenu(0);
 
+        panelMENU.add(panelCentral, BorderLayout.CENTER);
+        frameMENU.add(panelMENU);
+
+        panelBotonesMenu.setBackground(COLOR_FONDO_LIGHT);
+        panelCentral.setBackground(COLOR_FONDO_LIGHT);
+        panelBotonesMenu.setBackground(COLOR_FONDO_LIGHT);
+        btnregistro.setBackground(COLOR_BOTON_LIGHT);
+        btnhabitos.setBackground(COLOR_BOTON_LIGHT);
+
+    }
+
+    private static void crearPanelBotonesMenu(int n) {
+        if (panelBotonesMenu!=null){
+            panelMENU.remove(panelBotonesMenu);
+        }
+
+        panelBotonesMenu = new JPanel();
         btnhabitos = new JButton("habitos");
         btnhabitos.addActionListener(e -> {
             ventanaHabitos();
         });
         btnhabitos.setFont(new Font("Arial", Font.BOLD, 18));
-        panelBotonesMenu.add(btnhabitos);
 
         btnregistro = new JButton("registro");
         btnregistro.addActionListener(e -> {
             ventanaRegistro();
         });
         btnregistro.setFont(new Font("Arial", Font.BOLD, 18));
+
+        if (n==1){
+            btnregistro.setPreferredSize(new Dimension(120,50));
+            btnhabitos.setPreferredSize(new Dimension(120,50));
+        } else if (n==2) {
+            btnregistro.setPreferredSize(new Dimension(90,30));
+            btnhabitos.setPreferredSize(new Dimension(90,30));
+        }
+
+        panelBotonesMenu.add(btnhabitos);
         panelBotonesMenu.add(btnregistro);
 
-
-        panelMENU.add(panelCentral, BorderLayout.CENTER);
         panelMENU.add(panelBotonesMenu, BorderLayout.SOUTH);
-        frameMENU.add(panelMENU);
-        panelCentral.setBackground(COLOR_FONDO_LIGHT);
-        panelBotonesMenu.setBackground(COLOR_FONDO_LIGHT);
-        btnregistro.setBackground(COLOR_BOTON_LIGHT);
-        btnhabitos.setBackground(COLOR_BOTON_LIGHT);
-
+        panelMENU.revalidate();
+        panelMENU.repaint();
     }
 
     private static void ventanaHabitos() {
@@ -534,17 +554,17 @@ public class main {
         });
         JRadioButtonMenuItem radio1 = new JRadioButtonMenuItem("Botones grandes");
                 radio1.setSelected(true);
-        radio1.addActionListener(e -> {
-            if (radio1.isSelected()){
-                btnregistro.setSize(new Dimension(120,50));
-                btnhabitos.setSize(new Dimension(120,50));            }
+            radio1.addActionListener(e -> {
+                if (radio1.isSelected()){
+                    crearPanelBotonesMenu(1);
+                }
         });
         JRadioButtonMenuItem radio2 = new JRadioButtonMenuItem("Botones pequeños");
-                radio2.addActionListener(e -> {
-                    if (radio2.isSelected()){
-                        btnregistro.setSize(90,30);
-                        btnhabitos.setSize(90,30);                     }
-                });
+            radio2.addActionListener(e -> {
+                if (radio2.isSelected()){
+                    crearPanelBotonesMenu(2);
+                }
+            });
         ButtonGroup grupo = new ButtonGroup(); // Grupo para los radio
         grupo.add(radio1);
         grupo.add(radio2);
